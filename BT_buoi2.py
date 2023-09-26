@@ -1,35 +1,81 @@
-import pandas as pd
-from numpy import array
-import matplotlib.pyplot as plt
+import tkinter as tk
+from tkinter import Entry, Label, Button, messagebox
 import numpy as np
-df=pd.read_csv('diemPython.csv',index_col=0,header = 0)
-in_data = array(df.iloc[:,:])
-print(in_data)
-tongsv= in_data[:,1]
-x=np.sum(tongsv)
-print('Tong so sinh vien di thi :',x)
-tongsvtruot= in_data[:,10]
-y=np.sum(tongsvtruot)
-print('So sinh vien truot :',y)
-z=100-(y*100/x)
-print('Ti le sinh vien qua mon la: ',z, '%')
-L1=in_data[:,11]
-L2=in_data[:,12]
-tx1=in_data[:,13]
-tx2=in_data[:,14]
-CK=in_data[:,15]
-diemA = in_data[:,3]
-diemBc = in_data[:,4]
-diemB = in_data[:,5]
-print('Tong sv:',tongsv)
-print(' ')
-maxa = diemA.max()
-i, = np.where(diemA == maxa)
-print('lop co nhieu diem A la {0} co {1} sv dat diem A'.format(in_data[i,0],maxa))
-plt.plot(range(len(diemA)),diemA,'r-',label="Diem A")
-plt.plot(range(len(diemBc)),diemBc,'g-',label="Diem B +")
-plt.plot (range(len(diemB)),diemB,'y-',label="Diem B")
-plt.xlabel('Lơp')
-plt.ylabel(' So sv dat diem ')
-plt.legend(loc='upper right')
-plt.show()
+
+def solve_equations():
+    try:
+        # Lấy dữ liệu từ các ô nhập liệu
+        coefficients = []
+        for i in range(n):
+            row = []
+            for j in range(n + 1):
+                entry = entries[i][j]
+                value = float(entry.get())
+                row.append(value)
+            coefficients.append(row)
+        
+        A = np.array(coefficients[:, :-1])  # Ma trận hệ số
+        b = np.array(coefficients[:, -1])   # Vector vế phải
+        
+        # Giải hệ phương trình
+        x = np.linalg.solve(A, b)
+        
+        # Hiển thị kết quả
+        result_label.config(text="Nghiệm của hệ phương trình là:\n" + format_solution(x))
+    except Exception as e:
+        messagebox.showerror("Lỗi", "Đã xảy ra lỗi: " + str(e))
+
+def format_solution(x):
+    # Định dạng nghiệm thành chuỗi
+    solution_str = ""
+    for i, value in enumerate(x):
+        solution_str += f"x{i+1} = {value}\n"
+    return solution_str
+
+def confirm_dimensions():
+    global n
+    n = int(n_entry.get())
+    
+    # Xóa các ô nhập liệu cũ (nếu có)
+    for row_entries in entries:
+        for entry in row_entries:
+            entry.destroy()
+    
+    entries.clear()
+    
+    # Tạo lại các ô nhập liệu cho hệ phương trình mới
+    for i in range(n):
+        row_entries = []
+        for j in range(n + 1):
+            entry = Entry(window)
+            entry.grid(row=i + 3, column=j + 1)
+            row_entries.append(entry)
+        entries.append(row_entries)
+
+    # Tạo nút để giải hệ phương trình
+    solve_button = Button(window, text="Giải", command=solve_equations)
+    solve_button.grid(row=n + 4, column=1, columnspan=n + 1)
+
+# Tạo cửa sổ giao diện người dùng
+window = tk.Tk()
+window.title("Giải hệ phương trình")
+
+# Nhập số phương trình và số ẩn
+n_label = Label(window, text="Nhập số phương trình và số ẩn:")
+n_label.grid(row=1, column=1)
+n_entry = Entry(window)
+n_entry.grid(row=1, column=2)
+
+# Tạo nút để xác nhận số phương trình và số ẩn
+confirm_button = Button(window, text="Xác nhận", command=confirm_dimensions)
+confirm_button.grid(row=1, column=3)
+
+# Label để hiển thị kết quả
+result_label = Label(window, text="")
+result_label.grid(row=2, column=1, columnspan=3)
+
+entries = []
+n = 0  # Số phương trình và số ẩn
+
+# Bắt đầu vòng lặp chạy chương trình GUI
+window.mainloop()
